@@ -15,16 +15,11 @@ public class PenteApp {
 	private Player player1;
 	private Player player2;
 	private Player currentPlayer;
-	private int stonesCaptured1;
-	private int stonesCaptured2;
 
 	public void run() {
 		//
 		//
 		// *** Game components initialization ***
-
-		stonesCaptured1 = 0;
-		stonesCaptured2 = 0;
 
 		// Asking the current game board size
 		do {
@@ -51,64 +46,83 @@ public class PenteApp {
 		// Player 2 initialization
 		player2 = new Player(askPlayerName(2), Token.CROSS);
 
+		System.out.println(); // pretty console
+
 		// Setting current player
 		currentPlayer = player2;
+
+		// Display the empty board
+		Board.printGameBoard(board, -1, -1);
+
+		System.out.println(); // pretty console
 
 		//
 		//
 		// *** Starting a new game ***
-
+		boolean hasFiveInLine;
 		do {
 			// new turn
 			currentPlayer = (currentPlayer == player1) ? player2 : player1;
-			System.out.println((currentPlayer == player1 ? COLOR_RED + player1 : COLOR_BLUE + player2)
-					+ " it's your turn" + COLOR_RESET);
+			System.out.println((currentPlayer == player1 ? Color.RED.getCode() + player1.getName()
+					: Color.YELLOW.getCode() + player2.getName()) + " it's your turn" + Color.RESET.getCode());
 
 			// asking position to place the player stone
 			Boolean isPlaced;
+			int rowToPlace;
+			int colToPlace;
 			do {
 
 				// asking row position
-				int rowToPlace;
 				do {
-					rowToPlace = ReadKBData.enterInt("Row to place your stone:");
-					if (rowToPlace < 0 || rowToPlace > boardSize) {
-						System.err.println("Row must be on range! (0-" + boardSize + ")");
+					rowToPlace = ReadKBData.enterInt("Row to place your stone:") - 1;
+					if (rowToPlace < 0 || rowToPlace >= boardSize) {
+						System.err.println("Row must be on range! (1-" + boardSize + ")");
 					}
-				} while (rowToPlace < 0 || rowToPlace > boardSize);
+				} while (rowToPlace < 0 || rowToPlace >= boardSize);
 
 				// asking column position
-				int colToPlace;
+
 				do {
-					colToPlace = ReadKBData.enterInt("Row to place your stone");
-					if (colToPlace < 0 || colToPlace > boardSize) {
-						System.err.println("Row must be on range! (0-" + boardSize + ")");
+					colToPlace = ReadKBData.enterInt("Column to place your stone:") - 1;
+					if (colToPlace < 0 || colToPlace >= boardSize) {
+						System.err.println("Column must be on range! (1-" + boardSize + ")");
 					}
-				} while (colToPlace < 0 || colToPlace > boardSize);
+				} while (colToPlace < 0 || colToPlace >= boardSize);
 
 				// Setting the token
 				isPlaced = board.setToken(currentPlayer.getToken(), rowToPlace, colToPlace);
 
+				// notify the square is not empty
+				if (!isPlaced) {
+					System.out
+							.println(Color.RED.getCode() + "Error! The square is not empty..." + Color.RESET.getCode());
+				}
+
 			} while (!isPlaced);
 
 			// Now we need to check if the current player can catch any stone
-			
-
-			// code for catch token
+			int capturedStones = board.captureStones(currentPlayer.getToken(), rowToPlace, colToPlace);
+			// add captured stones to the player
+			currentPlayer.addStones(capturedStones);
 
 			// Display the board status
+			Board.printGameBoard(board, rowToPlace, colToPlace);
 
 			// Display two players captured stones
+			System.out.println(Color.RED.getCode() + player1.getName() + Color.RESET.getCode() + " captured tokens: "
+					+ player1.getStonesCaptured());
+			System.out.println(Color.YELLOW.getCode() + player2.getName() + Color.RESET.getCode() + " captured tokens: "
+					+ player2.getStonesCaptured());
 
-		} while (stonesCaptured1 < stonesToWin && stonesCaptured2 < stonesToWin
-				&& board.hasEmptySquares() /* and check five in line */ );
+			System.out.println(); // pretty console
+
+			// Check if the board has five in line
+			hasFiveInLine = board.checkFiveInLine(currentPlayer.getToken(), rowToPlace, colToPlace);
+
+		} while (player1.getStonesCaptured() < stonesToWin && player2.getStonesCaptured() < stonesToWin
+				&& board.hasEmptySquares() && !hasFiveInLine);
 
 	}
-
-	// ANSI color codes
-	final String COLOR_RED = "\u001B[31m";
-	final String COLOR_BLUE = "\u001B[34m";
-	final String COLOR_RESET = "\u001B[0m";
 
 	/**
 	 * Prompts the player to enter their name and validates the input.

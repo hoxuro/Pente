@@ -35,8 +35,6 @@ public class ReadKBData {
             } while (!input.hasNextInt());
         }
        
-        input.close();
-
         return input.nextInt();
     }
 
@@ -64,8 +62,6 @@ public class ReadKBData {
             } while (!input.hasNext());
         }
         
-        input.close();
-
         return input.next();
     }
 
@@ -92,8 +88,6 @@ public class ReadKBData {
             } while (!input.hasNextLine());
         }
         
-        input.close();
-
         return input.nextLine();
     }
 
@@ -121,8 +115,6 @@ public class ReadKBData {
             } while (!input.hasNextDouble());
         }
         
-        input.close();
-
         return input.nextDouble();
     }
 
@@ -149,8 +141,6 @@ public class ReadKBData {
             } while (!input.hasNextBoolean());
         }
         
-        input.close();
-
         return input.nextBoolean();
     }
 

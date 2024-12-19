@@ -29,12 +29,12 @@ public class Board {
 			Arrays.fill(testBoard.gameBoard[i], 0);
 		}
 
-		testBoard.gameBoard[5][1] = 1;
-		testBoard.gameBoard[5][2] = 1;
-		testBoard.gameBoard[5][4] = 1;
-		testBoard.gameBoard[5][5] = 1;
-
+		testBoard.gameBoard[0][0] = 1;
+		testBoard.gameBoard[1][1] = 1;
+		testBoard.gameBoard[2][2] = 1;
 		testBoard.gameBoard[3][3] = 1;
+
+		testBoard.gameBoard[4][4] = 1;
 		testBoard.gameBoard[4][3] = 1;
 		testBoard.gameBoard[6][3] = 1;
 		testBoard.gameBoard[7][3] = 1;
@@ -50,22 +50,26 @@ public class Board {
 		testBoard.gameBoard[9][9] = 1;
 
 		MyMatrix.display(testBoard.gameBoard);
-		testBoard.gameBoard[5][0] = 2;
-//		testBoard.gameBoard[5][6] = 2;
-		testBoard.gameBoard[2][3] = 2;
-//		testBoard.gameBoard[8][3] = 2;
-		testBoard.gameBoard[2][0] = 2;
-//		testBoard.gameBoard[8][6] = 2;
-		testBoard.gameBoard[7][7] = 2;
-//		testBoard.gameBoard[2][6] = 2;
+
+		System.out.println(testBoard.checkFiveInLine(Token.CIRCLE, 4, 4));
+//		testBoard.gameBoard[5][0] = 2;
+////		testBoard.gameBoard[5][6] = 2;
+//		testBoard.gameBoard[2][3] = 2;
+////		testBoard.gameBoard[8][3] = 2;
+//		testBoard.gameBoard[2][0] = 2;
+////		testBoard.gameBoard[8][6] = 2;
+//		testBoard.gameBoard[7][7] = 2;
+////		testBoard.gameBoard[2][6] = 2;
 
 		testBoard.setToken(Token.CROSS, 10, 10);
 		MyMatrix.display(testBoard.gameBoard);
-		System.out.println("Total captured: " + testBoard.captureStones(10, 10, Token.CROSS));
+		System.out.println("Total captured: " + testBoard.captureStones(Token.CROSS, 10, 10));
 
 		MyMatrix.display(testBoard.gameBoard);
 
 		System.out.println(Token.CROSS.getValue());
+
+		Board.printGameBoard(testBoard, 1, 1);
 	}
 
 	// ********************
@@ -88,18 +92,136 @@ public class Board {
 	// *** PUBLIC METHODS ***
 
 	/**
+	 * Prints the current state of the game board to the console. Each square is
+	 * visually formatted with grid lines, and an optional square can be highlighted
+	 * to indicate the last placed token or any specific position.
+	 *
+	 * 
+	 * // Print the board without highlighting printGameBoard(gameBoard, -1, -1);
+	 * 
+	 * // Print the board with the square at (1, 2) highlighted
+	 * printGameBoard(gameBoard, 1, 2);
+	 * </pre>
+	 *
+	 * @param board        The game board represented as a {@code Board} object. The
+	 *                     {@code gameBoard} attribute should be a 2D array where
+	 *                     each other values represent different players' tokens.
+	 * @param highlightRow The row index of the square to highlight. Pass -1 if no
+	 *                     highlighting is required.
+	 * @param highlightCol The column index of the square to highlight. Pass -1 if no
+	 *                     highlighting is required.
+	 *
+	 * @throws IllegalArgumentException If the game board is null or empty.
+	 * @throws IllegalArgumentException If the highlightRow or highlightCol are out
+	 *                                  of bounds when highlighting is requested.
+	 */
+	public static void printGameBoard(Board board, int highlightRow, int highlightCol) {
+		// Game board validation
+		if (board.gameBoard == null || board.gameBoard.length == 0) {
+			throw new IllegalArgumentException("The game board cannot be null or empty.");
+		}
+		if (highlightRow != -1 && (highlightRow < 0 || highlightRow >= board.gameBoard.length || highlightCol < 0
+				|| highlightCol >= board.gameBoard[0].length)) {
+			throw new IllegalArgumentException("Highlight position is out of bounds.");
+		}
+
+		// Loop through each row of the board
+		for (int row = 0; row < board.gameBoard.length; row++) {
+			// Print horizontal dividers for each row
+			System.out.print(" ");
+			System.out.print(" ---".repeat(board.gameBoard[row].length));
+			System.out.println();
+
+			// Print the row content
+			for (int col = 0; col < board.gameBoard[row].length; col++) {
+				String token = getTokenSymbol(board.gameBoard[row][col]);
+
+				// Highlight the last placed token
+				if (row == highlightRow && col == highlightCol) {
+					token = Color.RED.getCode() + token + Color.RESET.getCode();
+				}
+
+				printSquare(board.gameBoard, row, col, token);
+			}
+		}
+
+		// Print the bottom boundary for the last row
+		System.out.print(" ");
+		System.out.print(" ---".repeat(board.gameBoard[0].length));
+		System.out.println();
+	}
+
+	/**
+	 * Prints a square with the appropriate formatting based on its position.
+	 */
+	private static void printSquare(int[][] gameBoard, int row, int col, String token) {
+		if (col == 0) {
+			System.out.print("| " + token + " |");
+		} else if (col + 1 == gameBoard[row].length) {
+			System.out.print(" " + token + " |\n");
+		} else {
+			System.out.print(" " + token + " |");
+		}
+	}
+
+	/**
+	 * Returns the symbol to display for a given token value.
+	 *
+	 * @param squareValue The value in the game board square. Typically, 0 represents an
+	 *                  empty square.
+	 * @return The symbol to display as a {@code String}.
+	 */
+	private static String getTokenSymbol(int squareValue) {
+		switch (squareValue) {
+		case 1:
+			return "O"; // Token for Player 1
+		case 2:
+			return "X"; // Token for Player 2
+		default:
+			return " "; // Empty cell
+		}
+	}
+
+	public boolean checkFiveInLine(Token currentPlayerToken, int row, int col) {
+		// Row and column validation
+		if (row < 0 || row >= this.gameBoard.length || col < 0 || col >= this.gameBoard[0].length) {
+			throw new IllegalArgumentException("Row or column is out of bounds.");
+		}
+		// Enum validation
+		if (currentPlayerToken == null) {
+			throw new IllegalArgumentException("currentPlayerToken cannot be null.");
+		}
+		boolean hasFiveInLine = false;
+
+		// check five in line in row
+		hasFiveInLine = checkFiveInRow(currentPlayerToken, row, col);
+
+		if (!hasFiveInLine) {
+			hasFiveInLine = checkFiveInColumn(currentPlayerToken, row, col);
+		}
+		if (!hasFiveInLine) {
+			hasFiveInLine = checkFiveInMainDiag(currentPlayerToken, row, col);
+		}
+		if (!hasFiveInLine) {
+			hasFiveInLine = checkFiveInSecDiag(currentPlayerToken, row, col);
+		}
+
+		return hasFiveInLine;
+	}
+
+	/**
 	 * Checks and performs captures of opponent tokens in all possible directions
 	 * (row, column, main diagonal, and secondary diagonal) according to the Pente
 	 * game rules. A capture occurs when two opponent tokens are flanked by the
 	 * current player's tokens. Captured tokens are removed from the board, and the
 	 * method returns the total number of captured tokens.
 	 * 
+	 * @param currentPlayerToken The token of the current player, indicating whether
+	 *                           it is Token.CIRCLE or Token.CROSS.
 	 * @param row                The row of the board where the current player's
 	 *                           token is located.
 	 * @param col                The column of the board where the current player's
 	 *                           token is located.
-	 * @param currentPlayerToken The token of the current player, indicating whether
-	 *                           it is Token.CIRCLE or Token.CROSS.
 	 * 
 	 * @return The total number of tokens captured in all directions.
 	 *
@@ -107,7 +229,7 @@ public class Board {
 	 *                                  board's bounds.
 	 * @throws IllegalArgumentException If the currentPlayerToken parameter is null.
 	 */
-	public int captureStones(int row, int col, Token currentPlayerToken) {
+	public int captureStones(Token currentPlayerToken, int row, int col) {
 		// Row and column validation
 		if (row < 0 || row >= this.gameBoard.length || col < 0 || col >= this.gameBoard[0].length) {
 			throw new IllegalArgumentException("Row or column is out of bounds.");
@@ -188,9 +310,211 @@ public class Board {
 		return isEmpty;
 	}
 
-	// **********************
+	// ***********************
 	//
-	// *** PUBLIC METHODS ***
+	// *** PRIVATE METHODS ***
+
+	/**
+	 * Checks if there are five consecutive tokens in the secondary diagonal
+	 * (top-right to bottom-left) of the game board starting from the given position
+	 * (row, col) for the specified player.
+	 *
+	 * @param currentPlayerToken The token of the current player. Cannot be null.
+	 * @param row                The row index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @param col                The column index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @return {@code true} if there are five or more consecutive tokens of the
+	 *         current player in the secondary diagonal, {@code false} otherwise.
+	 * @throws IllegalArgumentException If the row or column is out of bounds, or if
+	 *                                  {@code currentPlayerToken} is {@code null}.
+	 */
+	private boolean checkFiveInSecDiag(Token currentPlayerToken, int row, int col) {
+		// Row and column validation
+		if (row < 0 || row >= this.gameBoard.length || col < 0 || col >= this.gameBoard[0].length) {
+			throw new IllegalArgumentException("Row or column is out of bounds.");
+		}
+		// Enum validation
+		if (currentPlayerToken == null) {
+			throw new IllegalArgumentException("currentPlayerToken cannot be null.");
+		}
+
+		// Start counting from the current token
+		int count = 1;
+
+		// Check downward-left (↙)
+		for (int r = row + 1, c = col - 1; r < this.gameBoard.length && c >= 0; r++, c--) {
+			if (this.gameBoard[r][c] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				// Stop when the sequence is broken
+				break;
+			}
+		}
+
+		// Check upward-right (↗)
+		for (int r = row - 1, c = col + 1; r >= 0 && c < this.gameBoard[0].length; r--, c++) {
+			if (this.gameBoard[r][c] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				break; // Stop when the sequence is broken
+			}
+		}
+
+		// If there are 5 or more tokens in the secondary diagonal, return true
+		return count >= 5;
+	}
+
+	/**
+	 * Checks if there are five consecutive tokens in the main diagonal (top-left to
+	 * bottom-right) of the game board starting from the given position (row, col)
+	 * for the specified player.
+	 *
+	 * @param currentPlayerToken The token of the current player. Cannot be null.
+	 * @param row                The row index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @param col                The column index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @return {@code true} if there are five or more consecutive tokens of the
+	 *         current player in the main diagonal, {@code false} otherwise.
+	 * @throws IllegalArgumentException If the row or column is out of bounds, or if
+	 *                                  {@code currentPlayerToken} is {@code null}.
+	 */
+	private boolean checkFiveInMainDiag(Token currentPlayerToken, int row, int col) {
+		// Row and column validation
+		if (row < 0 || row >= this.gameBoard.length || col < 0 || col >= this.gameBoard[0].length) {
+			throw new IllegalArgumentException("Row or column is out of bounds.");
+		}
+		// Enum validation
+		if (currentPlayerToken == null) {
+			throw new IllegalArgumentException("currentPlayerToken cannot be null.");
+		}
+
+		// Start counting from the current token
+		int count = 1;
+
+		// Check downward-right (↘)
+		for (int r = row + 1, c = col + 1; r < this.gameBoard.length && c < this.gameBoard[0].length; r++, c++) {
+			if (this.gameBoard[r][c] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				// Stop when the sequence is broken
+				break;
+			}
+		}
+
+		// Check upward-left (↖)
+		for (int r = row - 1, c = col - 1; r >= 0 && c >= 0; r--, c--) {
+			if (this.gameBoard[r][c] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				break; // Stop when the sequence is broken
+			}
+		}
+
+		// If there are 5 or more tokens in the main diagonal, return true
+		return count >= 5;
+	}
+
+	/**
+	 * Checks if there are five consecutive tokens in a specific column of the game
+	 * board starting from the given position (row, col) for the specified player.
+	 *
+	 * @param currentPlayerToken The token of the current player. Cannot be null.
+	 * @param row                The row index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @param col                The column index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @return {@code true} if there are five or more consecutive tokens of the
+	 *         current player in the specified column, {@code false} otherwise.
+	 * @throws IllegalArgumentException If the row or column is out of bounds, or if
+	 *                                  {@code currentPlayerToken} is {@code null}.
+	 */
+	private boolean checkFiveInColumn(Token currentPlayerToken, int row, int col) {
+		// Row and column validation
+		if (row < 0 || row >= this.gameBoard.length || col < 0 || col >= this.gameBoard[0].length) {
+			throw new IllegalArgumentException("Row or column is out of bounds.");
+		}
+		// Enum validation
+		if (currentPlayerToken == null) {
+			throw new IllegalArgumentException("currentPlayerToken cannot be null.");
+		}
+
+		// Start counting from the current token
+		int count = 1;
+
+		// Check downward
+		for (int r = row + 1; r < this.gameBoard.length; r++) {
+			if (this.gameBoard[r][col] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				// Stop when the sequence is broken
+				break;
+			}
+		}
+
+		// Check upward
+		for (int r = row - 1; r >= 0; r--) {
+			if (this.gameBoard[r][col] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				break; // Stop when the sequence is broken
+			}
+		}
+
+		// If there are 5 or more tokens in a column, return true
+		return count >= 5;
+	}
+
+	/**
+	 * Checks if there are five consecutive tokens in a specific row of the game
+	 * board starting from the given position (row, col) for the specified player.
+	 *
+	 * @param currentPlayerToken The token of the current player. Cannot be null.
+	 * @param row                The row index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @param col                The column index of the starting position to check.
+	 *                           Must be within the game board's bounds.
+	 * @return {@code true} if there are five or more consecutive tokens of the
+	 *         current player in the specified row, {@code false} otherwise.
+	 * @throws IllegalArgumentException If the row or column is out of bounds, or if
+	 *                                  {@code currentPlayerToken} is {@code null}.
+	 */
+	private boolean checkFiveInRow(Token currentPlayerToken, int row, int col) {
+		// Row and column validation
+		if (row < 0 || row >= this.gameBoard.length || col < 0 || col >= this.gameBoard[0].length) {
+			throw new IllegalArgumentException("Row or column is out of bounds.");
+		}
+		// Enum validation
+		if (currentPlayerToken == null) {
+			throw new IllegalArgumentException("currentPlayerToken cannot be null.");
+		}
+
+		// Start counting from the current token
+		int count = 1;
+
+		// Check to the right
+		for (int c = col + 1; c < this.gameBoard[0].length; c++) {
+			if (this.gameBoard[row][c] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				// Stop when the sequence is broken
+				break;
+			}
+		}
+
+		// Check to the left
+		for (int c = col - 1; c >= 0; c--) {
+			if (this.gameBoard[row][c] == currentPlayerToken.getValue()) {
+				count++;
+			} else {
+				break; // Stop when the sequence is broken
+			}
+		}
+
+		// If there are 5 or more tokens in a row, return true
+		return count >= 5;
+	}
 
 	/**
 	 * Checks and performs captures of opponent tokens along the secondary diagonal

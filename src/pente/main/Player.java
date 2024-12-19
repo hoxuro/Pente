@@ -18,6 +18,11 @@ public class Player {
 	private Token token;
 
 	/**
+	 * The name of the player.
+	 */
+	private int stonesCaptured;
+
+	/**
 	 * Constructs a new Player with the specified name.
 	 *
 	 * @param name the name of the player
@@ -34,6 +39,7 @@ public class Player {
 		}
 		this.name = name;
 		this.token = token;
+		this.stonesCaptured = 0;
 	}
 
 	/**
@@ -67,6 +73,30 @@ public class Player {
 	 */
 	public Token getToken() {
 		return token;
+	}
+
+	/**
+	 * Retrieves all the stones captured by the player.
+	 * 
+	 * @return the number of stones captured
+	 */
+	public int getStonesCaptured() {
+		return this.stonesCaptured;
+	}
+
+	/**
+	 * Adds a specified number of stones to the player's total captured stones
+	 * count.
+	 *
+	 * @param stones the number of stones to add to the captured stones count.
+	 * @throws IllegalArgumentException if the number of stones is negative.
+	 */
+	public void addStones(int stones) {
+		if (stones < 0) {
+			throw new IllegalArgumentException("The number of stones cannot be negative");
+		}
+
+		this.stonesCaptured += stones;
 	}
 
 }
