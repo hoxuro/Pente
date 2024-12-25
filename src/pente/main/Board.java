@@ -1,76 +1,11 @@
 package pente.main;
 
-import java.util.Arrays;
-
-import pente.utilis.MyArray;
-import pente.utilis.MyMatrix;
-
 public class Board {
 
 	// ******************
 	//
 	// *** ATTRIBUTES ***
 	private int[][] gameBoard;
-
-	public static void main(String[] args) {
-		// main method for dev testing
-		Board testBoard = new Board(11);
-		Player player1 = new Player("Heri", Token.CROSS);
-		Player player2 = new Player("Heri", Token.CIRCLE);
-//		testBoard.setToken(player1.getToken(), 0, 0);
-//		testBoard.setToken(player2.getToken(), 0, 3);
-//		testBoard.setToken(player1.getToken(), 0, 4);
-//		testBoard.setToken(player2.getToken(), 0, 2);
-//
-//		MyArray.display(testBoard.extract5PositionsRow(0, 0, false));
-//		MyArray.display(testBoard.extract5PositionsRow(0, 5, false));
-
-		for (int i = 0; i < 11; i++) {
-			Arrays.fill(testBoard.gameBoard[i], 0);
-		}
-
-		testBoard.gameBoard[0][0] = 1;
-		testBoard.gameBoard[1][1] = 1;
-		testBoard.gameBoard[2][2] = 1;
-		testBoard.gameBoard[3][3] = 1;
-
-		testBoard.gameBoard[4][4] = 1;
-		testBoard.gameBoard[4][3] = 1;
-		testBoard.gameBoard[6][3] = 1;
-		testBoard.gameBoard[7][3] = 1;
-
-		testBoard.gameBoard[4][2] = 1;
-		testBoard.gameBoard[3][1] = 1;
-		testBoard.gameBoard[6][4] = 1;
-		testBoard.gameBoard[7][5] = 1;
-
-		testBoard.gameBoard[4][4] = 1;
-		testBoard.gameBoard[3][5] = 1;
-		testBoard.gameBoard[8][8] = 1;
-		testBoard.gameBoard[9][9] = 1;
-
-		MyMatrix.display(testBoard.gameBoard);
-
-		System.out.println(testBoard.checkFiveInLine(Token.CIRCLE, 4, 4));
-//		testBoard.gameBoard[5][0] = 2;
-////		testBoard.gameBoard[5][6] = 2;
-//		testBoard.gameBoard[2][3] = 2;
-////		testBoard.gameBoard[8][3] = 2;
-//		testBoard.gameBoard[2][0] = 2;
-////		testBoard.gameBoard[8][6] = 2;
-//		testBoard.gameBoard[7][7] = 2;
-////		testBoard.gameBoard[2][6] = 2;
-
-		testBoard.setToken(Token.CROSS, 10, 10);
-		MyMatrix.display(testBoard.gameBoard);
-		System.out.println("Total captured: " + testBoard.captureStones(Token.CROSS, 10, 10));
-
-		MyMatrix.display(testBoard.gameBoard);
-
-		System.out.println(Token.CROSS.getValue());
-
-		Board.printGameBoard(testBoard, 1, 1);
-	}
 
 	// ********************
 	//
