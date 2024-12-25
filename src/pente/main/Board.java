@@ -108,8 +108,8 @@ public class Board {
 	 *                     each other values represent different players' tokens.
 	 * @param highlightRow The row index of the square to highlight. Pass -1 if no
 	 *                     highlighting is required.
-	 * @param highlightCol The column index of the square to highlight. Pass -1 if no
-	 *                     highlighting is required.
+	 * @param highlightCol The column index of the square to highlight. Pass -1 if
+	 *                     no highlighting is required.
 	 *
 	 * @throws IllegalArgumentException If the game board is null or empty.
 	 * @throws IllegalArgumentException If the highlightRow or highlightCol are out
@@ -128,7 +128,6 @@ public class Board {
 		// Loop through each row of the board
 		for (int row = 0; row < board.gameBoard.length; row++) {
 			// Print horizontal dividers for each row
-			System.out.print(" ");
 			System.out.print(" ---".repeat(board.gameBoard[row].length));
 			System.out.println();
 
@@ -146,40 +145,8 @@ public class Board {
 		}
 
 		// Print the bottom boundary for the last row
-		System.out.print(" ");
 		System.out.print(" ---".repeat(board.gameBoard[0].length));
 		System.out.println();
-	}
-
-	/**
-	 * Prints a square with the appropriate formatting based on its position.
-	 */
-	private static void printSquare(int[][] gameBoard, int row, int col, String token) {
-		if (col == 0) {
-			System.out.print("| " + token + " |");
-		} else if (col + 1 == gameBoard[row].length) {
-			System.out.print(" " + token + " |\n");
-		} else {
-			System.out.print(" " + token + " |");
-		}
-	}
-
-	/**
-	 * Returns the symbol to display for a given token value.
-	 *
-	 * @param squareValue The value in the game board square. Typically, 0 represents an
-	 *                  empty square.
-	 * @return The symbol to display as a {@code String}.
-	 */
-	private static String getTokenSymbol(int squareValue) {
-		switch (squareValue) {
-		case 1:
-			return "O"; // Token for Player 1
-		case 2:
-			return "X"; // Token for Player 2
-		default:
-			return " "; // Empty cell
-		}
 	}
 
 	public boolean checkFiveInLine(Token currentPlayerToken, int row, int col) {
@@ -774,6 +741,37 @@ public class Board {
 		}
 
 		return stonesCapt;
+	}
+
+	/**
+	 * Prints a square with the appropriate formatting based on its position.
+	 */
+	private static void printSquare(int[][] gameBoard, int row, int col, String token) {
+		if (col == 0) {
+			System.out.print("| " + token + " |");
+		} else if (col + 1 == gameBoard[row].length) {
+			System.out.print(" " + token + " |\n");
+		} else {
+			System.out.print(" " + token + " |");
+		}
+	}
+
+	/**
+	 * Returns the symbol to display for a given token value.
+	 *
+	 * @param squareValue The value in the game board square. Typically, 0
+	 *                    represents an empty square.
+	 * @return The symbol to display as a {@code String}.
+	 */
+	private static String getTokenSymbol(int squareValue) {
+		switch (squareValue) {
+		case 1:
+			return "O"; // Token for Player 1
+		case 2:
+			return "X"; // Token for Player 2
+		default:
+			return " "; // Empty cell
+		}
 	}
 
 	// *************************
