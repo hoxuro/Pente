@@ -10,15 +10,15 @@ public class Player {
 	/**
 	 * The name of the player.
 	 */
-	private String name;
+	private final String name;
 
 	/**
 	 * The token the player is playing with
 	 */
-	private Token token;
+	private final Token token;
 
 	/**
-	 * The name of the player.
+	 * The number of stones captured by the player.
 	 */
 	private int stonesCaptured;
 
@@ -52,21 +52,6 @@ public class Player {
 	}
 
 	/**
-	 * Updates the name of the player.
-	 *
-	 * @param name the new name of the player
-	 */
-	public void setName(String name) {
-		if (name == null || name.trim().isEmpty()) {
-			throw new IllegalArgumentException("The name of the player can`t be empty or null");
-		}
-		if (name.length() > 20) {
-			throw new IllegalArgumentException("The name of the player cannot be longer than 20 characters");
-		}
-		this.name = name;
-	}
-
-	/**
 	 * Retrieves the token of the player.
 	 *
 	 * @return the token of the player (either CIRCLE or CROSS)
@@ -97,6 +82,16 @@ public class Player {
 		}
 
 		this.stonesCaptured += stones;
+	}
+
+	/**
+	 * Returns a string representation of the player.
+	 *
+	 * @return a string with the player's name, token, and stones captured
+	 */
+	@Override
+	public String toString() {
+		return "Player{name='" + name + "', token=" + token + ", stonesCaptured=" + stonesCaptured + "}";
 	}
 
 }

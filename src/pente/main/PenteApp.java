@@ -4,108 +4,60 @@ import pente.utilis.ReadKBData;
 
 public class PenteApp {
 
-	public static void main(String[] args) {
-		PenteApp app = new PenteApp();
-		app.run();
-	}
+	// *****************
+	//
+	// *** CONSTANTS ***
+	private static final int MIN_BOARD_SIZE = 10;
+	private static final int MAX_BOARD_SIZE = 19;
+	private static final int MIN_STONES_TO_WIN = 5;
+	private static final int MAX_STONES_TO_WIN = 10;
 
+	// ******************
+	//
+	// *** ATTRIBUTES ***
 	private int boardSize;
 	private Board board;
 	private int stonesToWin;
 	private Player player1;
 	private Player player2;
 	private Player currentPlayer;
+	private int rowToPlace;
+	private int colToPlace;
 
+	/**
+	 * The main method serves as the entry point for the application.
+	 * 
+	 * @param args Command-line arguments passed to the application. These are not
+	 *             used in this implementation.
+	 */
+	public static void main(String[] args) {
+		PenteApp app = new PenteApp();
+		app.run();
+	}
+
+	/**
+	 * Executes the main game loop of the Pente application. This method handles the
+	 * initialization of the game, turn-based gameplay, and game-ending conditions,
+	 * while interacting with the user through the console.
+	 */
 	public void run() {
-		int playAgain = 0;
 		do {
-
 			//
-			//
-			// *** Game components initialization ***
-
-			// Asking the current game board size
-			do {
-				boardSize = ReadKBData.enterInt("Enter the board size (10 - 19):");
-				if (boardSize < 10 || boardSize > 19) {
-					System.err.println("Incorrect board size (10-19)");
-				}
-			} while (boardSize < 10 || boardSize > 19);
-
-			// Creation of a board with the asked size
-			this.board = new Board(boardSize);
-
-			// Asking and setting the amount of tokens to win
-			do {
-				stonesToWin = ReadKBData.enterInt("Enter the amount of stones to win:");
-				if (stonesToWin < 5 || stonesToWin > 10) {
-					System.err.println("Incorrect number of stones (5-10)");
-				}
-			} while (stonesToWin < 5 || stonesToWin > 10);
-
-			// Player 1 initialization
-			player1 = new Player(askPlayerName(1), Token.CIRCLE);
-
-			// Player 2 initialization
-			player2 = new Player(askPlayerName(2), Token.CROSS);
+			// *** Game state initialization ***
+			initializeGame();
 
 			System.out.println(); // pretty console
 
-			// Setting current player
-			currentPlayer = player2;
-
-			// Display the empty board
-			Board.printGameBoard(board, -1, -1);
-
-			System.out.println(); // pretty console
-
-			//
 			//
 			// *** Starting a new game ***
 			boolean hasFiveInLine;
 			do {
-				// new turn
-				currentPlayer = (currentPlayer == player1) ? player2 : player1;
-				System.out.println((currentPlayer == player1 ? Color.RED.getCode() + player1.getName()
-						: Color.YELLOW.getCode() + player2.getName()) + " it's your turn" + Color.RESET.getCode());
 
-				// asking position to place the player stone
-				Boolean isPlaced;
-				int rowToPlace;
-				int colToPlace;
-				do {
+				playTurn();
 
-					// asking row position
-					do {
-						rowToPlace = ReadKBData.enterInt("Row to place your stone:") - 1;
-						if (rowToPlace < 0 || rowToPlace >= boardSize) {
-							System.err.println("Row must be on range! (1-" + boardSize + ")");
-						}
-					} while (rowToPlace < 0 || rowToPlace >= boardSize);
-
-					// asking column position
-
-					do {
-						colToPlace = ReadKBData.enterInt("Column to place your stone:") - 1;
-						if (colToPlace < 0 || colToPlace >= boardSize) {
-							System.err.println("Column must be on range! (1-" + boardSize + ")");
-						}
-					} while (colToPlace < 0 || colToPlace >= boardSize);
-
-					// Setting the token
-					isPlaced = board.setToken(currentPlayer.getToken(), rowToPlace, colToPlace);
-
-					// notify the square is not empty
-					if (!isPlaced) {
-						System.out.println(
-								Color.RED.getCode() + "Error! The square is not empty..." + Color.RESET.getCode());
-					}
-
-				} while (!isPlaced);
-
-				// Now we need to check if the current player can catch any stone
+				// Check if the current player can catch any stone
 				int capturedStones = board.captureStones(currentPlayer.getToken(), rowToPlace, colToPlace);
-				// add captured stones to the player
+				// add captured stones to the current player
 				currentPlayer.addStones(capturedStones);
 
 				// Display the board status
@@ -125,7 +77,7 @@ public class PenteApp {
 			} while (player1.getStonesCaptured() < stonesToWin && player2.getStonesCaptured() < stonesToWin
 					&& board.hasEmptySquares() && !hasFiveInLine);
 
-			// Notify that the game is over
+			// Display end message that the game is over
 			if (hasFiveInLine) {
 				System.out.println(
 						currentPlayer.getName() + " has managed to place 5 stones in a line and wins the game!!");
@@ -139,19 +91,14 @@ public class PenteApp {
 
 			// Pretty console
 			System.out.println();
-			// ask if play again
-			do {
-				playAgain = ReadKBData.enterInt("Do you want to play again? (0-no | 1-yes)");
-				if (playAgain != 0 && playAgain != 1) {
-					System.err.println("Error. Please enter the data correctly!");
-				}
-			} while (playAgain != 0 && playAgain != 1);
-			// Pretty console
-			System.out.println();
 
-		} while (playAgain == 1);
+		} while (askValidInput("Do you want to play again? (0-no | 1-yes)", 0, 1) == 1);
 
 	}
+
+	// ***********************
+	//
+	// *** PRIVATE methods ***
 
 	/**
 	 * Prompts the player to enter their name and validates the input.
@@ -161,7 +108,7 @@ public class PenteApp {
 	 * @throws IllegalArgumentException if the player name is empty or exceeds 20
 	 *                                  characters.
 	 */
-	public static String askPlayerName(int playerNum) {
+	private String askPlayerName(int playerNum) {
 		String playerName;
 
 		do {
@@ -172,6 +119,63 @@ public class PenteApp {
 		} while ((playerName == null || playerName.trim().isEmpty()) || (playerName.length() > 20));
 
 		return playerName;
+	}
+
+	/**
+	 * Handles the logic for a single turn in the game. This method alternates
+	 * between players, prompts the current player for a valid row and column to
+	 * place their token, and validates the input to ensure the chosen square is
+	 * empty.
+	 */
+	private void playTurn() {
+		currentPlayer = (currentPlayer == player1) ? player2 : player1;
+		System.out.println((currentPlayer == player1 ? Color.RED.getCode() + player1.getName()
+				: Color.YELLOW.getCode() + player2.getName()) + " it's your turn" + Color.RESET.getCode());
+
+		// Row and Col to place the stone
+		rowToPlace = askValidInput("Row to place your stone:", 1, boardSize) - 1;
+		colToPlace = askValidInput("Column to place your stone:", 1, boardSize) - 1;
+
+		// ask again if the square is not empty
+		while (!board.setToken(currentPlayer.getToken(), rowToPlace, colToPlace)) {
+			System.err.println("The square is not empty!!");
+			rowToPlace = askValidInput("Row to place your stone:", 1, boardSize) - 1;
+			colToPlace = askValidInput("Column to place your stone:", 1, boardSize) - 1;
+		}
+	}
+
+	/**
+	 * Initializes the game by setting up the board, the winning conditions, and the
+	 * players.
+	 */
+	private void initializeGame() {
+		boardSize = askValidInput("Enter the board size (10 - 19):", MIN_BOARD_SIZE, MAX_BOARD_SIZE);
+		board = new Board(boardSize);
+		stonesToWin = askValidInput("Enter the amount of stones to win (5-10):", MIN_STONES_TO_WIN, MAX_STONES_TO_WIN);
+
+		player1 = new Player(askPlayerName(1), Token.CIRCLE);
+		player2 = new Player(askPlayerName(2), Token.CROSS);
+		currentPlayer = player2; // Player 2 starts the game
+		Board.printGameBoard(board, -1, -1);
+	}
+
+	/**
+	 * Prompts the user to enter a valid integer input within a specified range.
+	 * 
+	 * @param message The message displayed to the user prompting them for input.
+	 * @param min     The minimum allowable input value.
+	 * @param max     The maximum allowable input value.
+	 * @return A valid integer input within the specified range.
+	 */
+	private int askValidInput(String message, int min, int max) {
+		int value;
+		do {
+			value = ReadKBData.enterInt(message);
+			if (value < min || value > max) {
+				System.err.println("Input must be between " + min + " and " + max);
+			}
+		} while (value < min || value > max);
+		return value;
 	}
 
 }

@@ -204,7 +204,7 @@ public class Board {
 		for (int[] row : this.gameBoard) {
 			for (int elem : row) {
 				if (elem == Token.EMPTY.getValue()) {
-					isEmpty = true;
+					return true;
 				}
 			}
 		}
